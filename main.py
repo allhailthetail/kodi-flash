@@ -44,6 +44,9 @@ def upgrade_cpe(sess, ip, file):
     sess.type(f"{file}", id="file")
     sess.click("Upgrade")
 
+# BUG FOUND!!    
+# Success Dialog after uploading Certs needs to be dismissed, else the wrapper crashes.  
+#
 def add_certs_cpe(sess, ip, ca_cert, certpair_loc):
     sess.go_to(f"https://{ip}/cbsd.asp")
     time.sleep(5)
