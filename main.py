@@ -74,19 +74,38 @@ def upload_config_cpe(sess, ip, conf):
 #
 
 def main():
-    # Example usage:
     # Initiate main browser session:
-    #main_session = login_cpe(IP, USERNAME, PASSWORD) 
-    #
-    # Example, add certificates:
-    #add_certs_cpe(main_session, IP, TARFILE, CERTPAIR_LOC)
-    #
-    # Example, add configuration:
-    #upload_config_cpe(main_session, IP, CONFIG_LOC)
-    #
-    # Prompt to end the program.  
-    #input('press enter to exit program successfully.')
+    main_session = login_cpe(IP, USERNAME, PASSWORD) 
+    
+    time.sleep(5)
 
+    # Example, Upgrade CPE:
+    upgrade_cpe(main_session, IP, UPGRADE_FILE)
+    
+    #input("Upgrade Complete, Press Enter or Exit")
+
+    # Wait for reboot post-upgrade:
+    time.sleep(80)
+
+    # NOTE system reboots after update, login required:
+    # to do: make this nicer.  Close/re-open wrapper?
+    main_session = login_cpe(IP, USERNAME, PASSWORD) 
+
+    # Example, add certificates:
+    add_certs_cpe(main_session, IP, TARFILE, CERTPAIR_LOC)
+    
+    # to add: close wrapper and re-open, to avoid pop-up crash that verifies successful upload!
+    # to add: remove input stop-point, instead wait for pop up, the check for confirmation of successful cert upload. 
+    input("Certificates Complete, Press Enter or Exit")
+
+    # Example, add configuration:
+    upload_config_cpe(main_session, IP, CONFIG_LOC)
+    
+    print("Config Uploaded Successfully!")
+
+    # Prompt to end the program.  
+    input('press enter to exit program successfully.')
+    
 # 
 #
 # End Main Runtime Definition
