@@ -10,15 +10,15 @@ from webbot import Browser
 import pyautogui
 import time
 
-# Static values that are required to execute the program:
+# Static values that are required to execute the program:input()
 #
-IP = '192.168.0.1'
+# IP = '10.25.1.225'
 USERNAME = '#USERNAME'
 PASSWORD = '#PASSWORD' 
-UPGRADE_FILE = '#FILE'
-TARFILE = '#FILE'
-CERTPAIR_LOC = '#FILE'
-CONFIG_LOC = '#FILE'
+ACS_URL = "http://IP:PORT"
+ACS_USER = "#USERNAME"
+ACS_PASSWORD = "#PASSWORD"
+INFORM = "#INTERVAL"
 
 #
 #
@@ -61,6 +61,22 @@ def upload_config_cpe(sess, ip, conf):
     sess.click("Upload", tag="span")
     time.sleep(30)
     pyautogui.press('enter')
+
+def activate_acs(sess, ip):
+    sess.go_to(f"https://{ip}/tr069.asp")
+    time.sleep(3)
+    sess.click(id="enable")
+    time.sleep(3)
+    sess.type(f"{ACS_URL}", id="url")
+    sess.type(f"{ACS_USER}", id="username")
+    sess.type(f"{ACS_PASSWORD}", id="password")
+    sess.click(id="periodic_enable")
+    time.sleep(3)
+    sess.type(f"{INFORM}", id="periodic_interval")
+    sess.click("Submit")
+    time.sleep(5)
+    pyautogui.press('enter') # for some reason, it's critical to dismiss prompt!!
+
 #
 #
 # End Function Definitions
@@ -74,29 +90,19 @@ def upload_config_cpe(sess, ip, conf):
 #
 
 def main():
-    # This is a basic example of the program running:
-    # in a nutshell, the radio gets firmware flashed,
-    # certificates added, and a custom config uploaded.  
-    # The idea behind the example is to illustrate taking a radio from 
-    # out-of-box condition to production-ready.
-    #
-    # Initiate main browser session:
-    main_session = login_cpe(IP, USERNAME, PASSWORD) 
-    # Wait for main page to load:    
-    time.sleep(5)
-    # Example, Upgrade CPE:
-    upgrade_cpe(main_session, IP, UPGRADE_FILE)
-    # Wait for reboot post-upgrade:
-    time.sleep(60)
-    # NOTE system reboots after update, login required:
-    main_session = login_cpe(IP, USERNAME, PASSWORD) 
-    # Example, add certificates:
-    add_certs_cpe(main_session, IP, TARFILE, CERTPAIR_LOC)
-    # Example, add configuration:
-    upload_config_cpe(main_session, IP, CONFIG_LOC)
 
-    # Prompt to end the program.  
-    input('press enter to exit program successfully.')
+    with open("ips.txt","r") as ips:
+        for ip in ips:
+            IP = f"{ip}"
+        
+            main_session = login_cpe(IP, USERNAME, PASSWORD) 
+            # Wait for main page to load:    
+            time.sleep(5)
+
+            activate_acs(main_session, IP)
+            # Prompt to end the program.  
+            print(f"done with {IP}")
+            main_session.close_current_tab()
 
 # 
 #
